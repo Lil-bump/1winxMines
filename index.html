@@ -17,6 +17,7 @@
       --primary-blue: #4A9EFF;
       --secondary-blue: #2E86FF;
       --accent-blue: #1E7BFF;
+      --dark-blue: #0a3b7a;
       --dark-bg: #0A0A0F;
       --card-bg: #1A1A2E;
       --grid-bg: #16213E;
@@ -178,14 +179,14 @@
     }
 
     .bomb-option {
-      padding: 14px 22px;
+      padding: 12px 18px; /* Taille réduite */
       background: linear-gradient(145deg, #2A2A3E, #1F1F2E);
       border: 2px solid transparent;
       border-radius: 25px;
       color: var(--text-secondary);
       cursor: pointer;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      font-size: 16px;
+      font-size: 14px; /* Police légèrement plus petite */
       font-weight: 700;
       min-width: 55px;
       text-align: center;
@@ -307,22 +308,30 @@
       }
     }
 
-    .blue-star {
-      font-size: 26px;
-      color: var(--primary-blue);
-      filter: drop-shadow(0 0 15px var(--glow-blue));
-      animation: starTwinkle 1.5s ease-in-out infinite alternate;
+    /* Animation de révélation de l'étoile */
+    .reveal-star {
+      animation: starReveal 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
     }
 
-    @keyframes starTwinkle {
-      from { 
-          transform: scale(1) rotate(0deg);
-          filter: drop-shadow(0 0 15px var(--glow-blue));
+    @keyframes starReveal {
+      0% {
+        transform: scale(0) rotate(180deg);
+        opacity: 0;
       }
-      to { 
-          transform: scale(1.1) rotate(5deg);
-          filter: drop-shadow(0 0 25px var(--glow-intense));
+      70% {
+        transform: scale(1.2) rotate(-10deg);
+        opacity: 1;
       }
+      100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    .blue-star {
+      font-size: 26px;
+      color: var(--dark-blue);
+      filter: drop-shadow(0 0 15px var(--glow-blue));
     }
 
     .controls {
@@ -369,13 +378,11 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
-
-
     .affiliate {
       background: linear-gradient(to right, #10b981, #059669);
       color: white;
       text-decoration: none;
-      padding: 18px 25px;
+      padding: 16px 25px; /* Même taille que le bouton de génération */
       border-radius: 15px;
       font-weight: 700;
       font-size: 1.1rem;
@@ -384,6 +391,7 @@
       display: block;
       box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
       animation: pulse 2s infinite;
+      width: 100%; /* Prend toute la largeur */
     }
 
     .affiliate:hover {
@@ -486,14 +494,13 @@
       }
       
       .bomb-option {
-          padding: 12px 18px;
-          font-size: 14px;
-          min-width: 50px;
+          padding: 10px 12px; /* Taille encore plus réduite sur petits écrans */
+          font-size: 13px; /* Police plus petite sur mobile */
+          min-width: 45px; /* Largeur minimale réduite */
       }
       
-      .btn {
-          padding: 16px;
-          font-size: 16px;
+      .btn, .affiliate {
+          padding: 16px; /* Même taille pour les deux boutons */
       }
     }
   </style>
@@ -678,23 +685,21 @@
       }
 
       calculateAISafeCells() {
-        // Calcul du nombre de cases sûres
+        // Calcul du nombre de cases sûres basé sur les bombes sélectionnées
         let safeCellsCount;
         switch(this.selectedBombs) {
           case 1:
-            safeCellsCount = 20;
+            safeCellsCount = 10;  // 1 bombe = 10 étoiles
             break;
           case 3:
-            safeCellsCount = 15;
+            safeCellsCount = 5;   // 3 bombes = 5 étoiles
             break;
           case 5:
-            safeCellsCount = 10;
-            break;
           case 7:
-            safeCellsCount = 8;
+            safeCellsCount = 4;   // 5 ou 7 bombes = 4 étoiles
             break;
           default:
-            safeCellsCount = 15;
+            safeCellsCount = 10;
         }
 
         let safeCells = [];
@@ -749,31 +754,41 @@
           const cell = this.grid[index];
           
           // Délai entre chaque révélation d'étoile
-          await this.delay(150 + Math.random() * 150);
+          await this.delay(300 + Math.random() * 200);
           
           // Ajouter l'étoile avec animation
           cell.element.classList.add('safe');
-          cell.element.innerHTML = '<span class="blue-star">★</span>';
+          
+          // Créer l'élément étoile avec animation de révélation
+          const star = document.createElement('span');
+          star.className = 'blue-star reveal-star';
+          star.innerHTML = '★';
+          
+          cell.element.innerHTML = '';
+          cell.element.appendChild(star);
           cell.isSafe = true;
           
           // Créer des particules autour de l'étoile
           this.createStarParticles(cell.element);
           
-          // Animation d'apparition
-          cell.element.style.transform = 'scale(0.5) rotate(180deg)';
-          cell.element.style.opacity = '0';
-          
-          // Animation d'apparition fluide
-          setTimeout(() => {
-            cell.element.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-            cell.element.style.transform = 'scale(1.1) rotate(0deg)';
-            cell.element.style.opacity = '1';
-            
-            // Retour à la taille normale
-            setTimeout(() => {
-              cell.element.style.transform = 'scale(1) rotate(0deg)';
-            }, 200);
-          }, 50);
+          // Vibration haptique
+          this.triggerHapticFeedback(50);
+
+          // Supprimer l'animation après son exécution
+          star.addEventListener('animationend', () => {
+            star.classList.remove('reveal-star');
+          });
+        }
+      }
+
+      // Fonction pour déclencher la vibration haptique
+      triggerHapticFeedback(duration) {
+        try {
+          if (navigator.vibrate) {
+            navigator.vibrate(duration);
+          }
+        } catch (e) {
+          console.error("La vibration haptique n'est pas supportée", e);
         }
       }
 
@@ -865,13 +880,6 @@
       }
     }
 
-    // Initialisation de l'application
-    document.addEventListener('DOMContentLoaded', () => {
-      new MinesPredictor();
-      new BlueParticles();
-      createAnimatedCircles();
-    });
-
     // Fonction pour créer des cercles animés en fond
     function createAnimatedCircles() {
       const backgroundAnim = document.querySelector('.background-anim');
@@ -906,6 +914,13 @@
         backgroundAnim.appendChild(circle);
       }
     }
+
+    // Initialisation de l'application
+    document.addEventListener('DOMContentLoaded', () => {
+      new MinesPredictor();
+      new BlueParticles();
+      createAnimatedCircles();
+    });
   </script>
 </body>
 </html>
