@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prédictions Mines 1win Pro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    :root {
+      --primary-blue: #4A9EFF;
+      --secondary-blue: #2E86FF;
+      --accent-blue: #1E7BFF;
+      --dark-bg: #0A0A0F;
+      --card-bg: #1A1A2E;
+      --grid-bg: #16213E;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B8C5D6;
+      --glow-blue: rgba(74, 158, 255, 0.4);
+      --glow-intense: rgba(74, 158, 255, 0.8);
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Canvas pour les particules bleues */
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 400px;
+      width: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      border: 1px solid rgba(94, 234, 212, 0.1);
+      position: relative;
+      padding: 20px;
+      animation: fadeIn 0.8s ease-out;
+      z-index: 10;
+      backdrop-filter: blur(15px);
+    }
+
+    .container::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(to right, #0ea5e9, #8b5cf6, #ec4899);
+    }
+
+    /* En-tête adapté du nouveau design */
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding: 0 10px;
+    }
+
+    .title-container {
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #0ea5e9, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 10px rgba(14, 165, 233, 0.3);
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      max-width: 350px;
+      margin: 0 auto 20px;
+      line-height: 1.5;
+    }
+
+    .background-anim {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      filter: blur(2px);
+    }
+
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.08), transparent 70%);
+      animation: float 45s infinite linear;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(15px, 20px) rotate(90deg); }
+      50% { transform: translate(0, 30px) rotate(180deg); }
+      75% { transform: translate(-15px, 20px) rotate(270deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: space-between;
+      background: rgba(30, 41, 59, 0.7);
+      padding: 12px 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(94, 234, 212, 0.1);
+      animation: slideIn 0.6s ease-out;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #0ea5e9;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+
+    .bomb-selector {
+      margin-bottom: 25px;
+    }
+
+    .bomb-label {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .bomb-options {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .bomb-option {
+      padding: 14px 22px;
+      background: linear-gradient(145deg, #2A2A3E, #1F1F2E);
+      border: 2px solid transparent;
+      border-radius: 25px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 16px;
+      font-weight: 700;
+      min-width: 55px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 
+          0 4px 8px rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .bomb-option::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(74, 158, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .bomb-option:hover::before {
+      left: 100%;
+    }
+
+    .bomb-option:hover {
+      background: linear-gradient(145deg, rgba(74, 158, 255, 0.2), rgba(46, 134, 255, 0.1));
+      border-color: rgba(74, 158, 255, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 
+          0 8px 20px rgba(74, 158, 255, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .bomb-option.active {
+      background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+      border-color: var(--primary-blue);
+      color: white;
+      box-shadow: 
+          0 0 20px var(--glow-blue),
+          0 8px 20px rgba(74, 158, 255, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    .grid-container {
+      margin-bottom: 25px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      padding: 15px;
+      background: linear-gradient(145deg, var(--grid-bg), rgba(22, 33, 62, 0.8));
+      border-radius: 20px;
+      border: 1px solid rgba(74, 158, 255, 0.2);
+      position: relative;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .grid-cell {
+      aspect-ratio: 1;
+      background: linear-gradient(145deg, #2A2A3E, #1F1F2E);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 
+          0 4px 8px rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .grid-cell::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent, rgba(74, 158, 255, 0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .grid-cell:hover::before {
+      opacity: 1;
+    }
+
+    .grid-cell.safe {
+      background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+      color: white;
+      border-color: var(--primary-blue);
+      box-shadow: 
+          0 0 25px var(--glow-blue),
+          0 8px 25px rgba(74, 158, 255, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      animation: safeGlow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes safeGlow {
+      from { 
+          box-shadow: 
+              0 0 25px var(--glow-blue),
+              0 8px 25px rgba(74, 158, 255, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      }
+      to { 
+          box-shadow: 
+              0 0 35px var(--glow-intense),
+              0 12px 35px rgba(74, 158, 255, 0.6),
+              inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      }
+    }
+
+    .blue-star {
+      font-size: 26px;
+      color: var(--primary-blue);
+      filter: drop-shadow(0 0 15px var(--glow-blue));
+      animation: starTwinkle 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes starTwinkle {
+      from { 
+          transform: scale(1) rotate(0deg);
+          filter: drop-shadow(0 0 15px var(--glow-blue));
+      }
+      to { 
+          transform: scale(1.1) rotate(5deg);
+          filter: drop-shadow(0 0 25px var(--glow-intense));
+      }
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 25px;
+      animation: slideIn 1s ease-out;
+    }
+
+    .btn {
+      padding: 16px 25px;
+      border-radius: 15px;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, #0ea5e9, #8b5cf6);
+      color: white;
+      box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      background: linear-gradient(45deg, #666, #444);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+
+
+    .affiliate {
+      background: linear-gradient(to right, #10b981, #059669);
+      color: white;
+      text-decoration: none;
+      padding: 18px 25px;
+      border-radius: 15px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      display: block;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      animation: pulse 2s infinite;
+    }
+
+    .affiliate:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .affiliate:active {
+      transform: translateY(0);
+    }
+
+    .affiliate i {
+      margin-right: 10px;
+    }
+
+    /* Pied de page adapté du premier fichier */
+    footer {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9rem;
+      padding: 0 10px;
+      margin-top: 25px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Animations du nouveau design */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+      50% { transform: scale(1.02); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); }
+      100% { transform: scale(1); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+    }
+
+    /* Animation pour les cellules */
+    .grid-cell {
+      animation: cellEntry 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      animation-fill-mode: both;
+    }
+
+    @keyframes cellEntry {
+      from {
+          opacity: 0;
+          transform: scale(0.8) rotateY(90deg);
+      }
+      to {
+          opacity: 1;
+          transform: scale(1) rotateY(0deg);
+      }
+    }
+
+    /* Animation pour les particules */
+    .star-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--primary-blue);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+      animation: starParticle 1s ease-out forwards;
+    }
+
+    @keyframes starParticle {
+      0% {
+          opacity: 1;
+          transform: translate(0, 0) scale(1);
+      }
+      100% {
+          opacity: 0;
+          transform: translate(var(--tx), var(--ty)) scale(0.2);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+          padding: 20px;
+      }
+      
+      .title {
+          font-size: 24px;
+      }
+      
+      .subtitle {
+          font-size: 0.95rem;
+      }
+      
+      .bomb-options {
+          gap: 8px;
+      }
+      
+      .bomb-option {
+          padding: 12px 18px;
+          font-size: 14px;
+          min-width: 50px;
+      }
+      
+      .btn {
+          padding: 16px;
+          font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Animation de fond - plus visible -->
+  <div class="background-anim">
+    <div class="circle" style="width: 300px; height: 300px; top: 10%; left: 5%; animation-duration: 20s;"></div>
+    <div class="circle" style="width: 200px; height: 200px; top: 60%; left: 80%; animation-duration: 15s; animation-delay: -5s;"></div>
+    <div class="circle" style="width: 150px; height: 150px; top: 30%; left: 70%; animation-duration: 25s; animation-delay: -10s;"></div>
+  </div>
+
+  <!-- Canvas pour les particules bleues -->
+  <canvas id="particles-canvas"></canvas>
+
+  <div class="container">
+    <!-- En-tête adapté du nouveau design -->
+    <div class="header">
+      <div class="title-container">
+        <h1 class="title"><i class="fas fa-gem"></i> Mines Prediction Pro</h1>
+      </div>
+      <p class="subtitle">Découvrez les cases gagnantes avec notre algorithme de prédiction exclusif</p>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-value">24h/24h</div>
+        <div class="stat-label">Prédictions</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">98%</div>
+        <div class="stat-label">Précision</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">25x</div>
+        <div class="stat-label">Gain max</div>
+      </div>
+    </div>
+
+    <div class="bomb-selector">
+      <div class="bomb-label">Nombre de bombes</div>
+      <div class="bomb-options">
+        <div class="bomb-option active" data-bombs="1">1💣</div>
+        <div class="bomb-option" data-bombs="3">3💣</div>
+        <div class="bomb-option" data-bombs="5">5💣</div>
+        <div class="bomb-option" data-bombs="7">7💣</div>
+      </div>
+    </div>
+
+    <div class="grid-container">
+      <div class="grid" id="minesGrid"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" id="generateBtn">
+        <i class="fas fa-sync-alt"></i> Nouvelle prédiction
+      </button>
+    </div>
+
+    <a href="https://1wulri.life/?p=m8d6" target="_blank" class="affiliate">
+      <i class="fas fa-rocket"></i> Inscription sur 1win avec bonus
+    </a>
+
+    <footer>
+      <p>© 2025 Mines Prediction Pro | Utilisez le code promo: <strong>GS07</strong></p>
+    </footer>
+  </div>
+
+  <script>
+    class MinesPredictor {
+      constructor() {
+        this.selectedBombs = 1;
+        this.grid = [];
+        this.isGenerating = false;
+        this.aiPatterns = this.initializeAIPatterns();
+        
+        this.initializeGrid();
+        this.bindEvents();
+      }
+
+      initializeAIPatterns() {
+        return [
+          {
+            name: "Corner Safe",
+            cells: [0, 1, 5, 6, 10, 11, 15, 16, 20, 21],
+            weight: 0.25
+          },
+          {
+            name: "Cross Pattern",
+            cells: [2, 7, 10, 11, 12, 13, 14, 17, 22],
+            weight: 0.20
+          },
+          {
+            name: "Edge Avoidance",
+            cells: [6, 7, 8, 11, 12, 13, 16, 17, 18],
+            weight: 0.30
+          },
+          {
+            name: "Diagonal Safe",
+            cells: [0, 6, 12, 18, 24, 4, 8, 16, 20],
+            weight: 0.25
+          }
+        ];
+      }
+
+      initializeGrid() {
+        const minesGrid = document.getElementById('minesGrid');
+        minesGrid.innerHTML = '';
+        this.grid = [];
+
+        for (let i = 0; i < 25; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'grid-cell';
+          cell.dataset.index = i;
+          minesGrid.appendChild(cell);
+          this.grid.push({ element: cell, isSafe: false, isMine: false });
+        }
+      }
+
+      bindEvents() {
+        // Sélection du nombre de bombes
+        document.querySelectorAll('.bomb-option').forEach(option => {
+          option.addEventListener('click', (e) => {
+            document.querySelectorAll('.bomb-option').forEach(opt => opt.classList.remove('active'));
+            e.target.classList.add('active');
+            this.selectedBombs = parseInt(e.target.dataset.bombs);
+            this.clearGrid();
+            this.playSelectSound();
+          });
+        });
+
+        // Bouton de génération de signal
+        document.getElementById('generateBtn').addEventListener('click', () => {
+          if (!this.isGenerating) {
+            this.generateAdvancedPrediction();
+          }
+        });
+      }
+
+      playSelectSound() {
+        // Simulation d'un feedback sonore visuel
+        const button = event.target;
+        button.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          button.style.transform = '';
+        }, 150);
+      }
+
+      clearGrid() {
+        this.grid.forEach(cell => {
+          cell.element.className = 'grid-cell';
+          cell.element.innerHTML = '';
+          cell.isSafe = false;
+          cell.isMine = false;
+        });
+      }
+
+      async generateAdvancedPrediction() {
+        if (this.isGenerating) return;
+        
+        this.isGenerating = true;
+        this.clearGrid();
+        
+        const generateBtn = document.getElementById('generateBtn');
+        
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ANALYSE EN COURS';
+
+        // Simulation du temps de traitement IA avancée
+        await this.delay(2000 + Math.random() * 1000);
+
+        // Algorithme de prédiction IA sophistiqué
+        const safeCells = this.calculateAISafeCells();
+        
+        // Animation d'apparition des prédictions
+        await this.animatePredictions(safeCells);
+
+        // Arrêter l'animation et remettre le bouton à l'état normal
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Nouvelle prédiction';
+        this.isGenerating = false;
+      }
+
+      calculateAISafeCells() {
+        // Calcul du nombre de cases sûres
+        let safeCellsCount;
+        switch(this.selectedBombs) {
+          case 1:
+            safeCellsCount = 20;
+            break;
+          case 3:
+            safeCellsCount = 15;
+            break;
+          case 5:
+            safeCellsCount = 10;
+            break;
+          case 7:
+            safeCellsCount = 8;
+            break;
+          default:
+            safeCellsCount = 15;
+        }
+
+        let safeCells = [];
+
+        // Algorithme de sélection basé sur les patterns IA
+        const selectedPattern = this.aiPatterns[Math.floor(Math.random() * this.aiPatterns.length)];
+        const patternCells = [...selectedPattern.cells].sort(() => Math.random() - 0.5);
+
+        // Ajouter les cellules du pattern sélectionné
+        for (let i = 0; i < Math.min(safeCellsCount * 0.7, patternCells.length); i++) {
+          if (!safeCells.includes(patternCells[i])) {
+            safeCells.push(patternCells[i]);
+          }
+        }
+
+        // Compléter avec des cellules aléatoires intelligentes
+        const remainingCells = Array.from({length: 25}, (_, i) => i)
+          .filter(i => !safeCells.includes(i))
+          .sort(() => Math.random() - 0.5);
+
+        while (safeCells.length < safeCellsCount && remainingCells.length > 0) {
+          safeCells.push(remainingCells.pop());
+        }
+
+        return safeCells.slice(0, safeCellsCount);
+      }
+      
+      createStarParticles(element) {
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        for (let i = 0; i < 8; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const distance = 30 + Math.random() * 20;
+          const particle = document.createElement('div');
+          
+          particle.className = 'star-particle';
+          particle.style.left = `${centerX}px`;
+          particle.style.top = `${centerY}px`;
+          particle.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
+          particle.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
+          
+          document.body.appendChild(particle);
+          setTimeout(() => particle.remove(), 1000);
+        }
+      }
+
+      async animatePredictions(safeCells) {
+        for (let i = 0; i < safeCells.length; i++) {
+          const index = safeCells[i];
+          const cell = this.grid[index];
+          
+          // Délai entre chaque révélation d'étoile
+          await this.delay(150 + Math.random() * 150);
+          
+          // Ajouter l'étoile avec animation
+          cell.element.classList.add('safe');
+          cell.element.innerHTML = '<span class="blue-star">★</span>';
+          cell.isSafe = true;
+          
+          // Créer des particules autour de l'étoile
+          this.createStarParticles(cell.element);
+          
+          // Animation d'apparition
+          cell.element.style.transform = 'scale(0.5) rotate(180deg)';
+          cell.element.style.opacity = '0';
+          
+          // Animation d'apparition fluide
+          setTimeout(() => {
+            cell.element.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            cell.element.style.transform = 'scale(1.1) rotate(0deg)';
+            cell.element.style.opacity = '1';
+            
+            // Retour à la taille normale
+            setTimeout(() => {
+              cell.element.style.transform = 'scale(1) rotate(0deg)';
+            }, 200);
+          }, 50);
+        }
+      }
+
+      delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+    }
+
+    // Système de particules bleues pour l'arrière-plan
+    class BlueParticles {
+      constructor() {
+        this.canvas = document.getElementById('particles-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.particles = [];
+        this.hue = 200; // Valeur initiale pour le bleu
+        this.hueChangeRate = 0.05; // Vitesse de changement de teinte réduite
+        this.particleCount = 60; // Nombre de particules réduit
+        
+        this.resize();
+        window.addEventListener('resize', this.resize.bind(this));
+        this.initParticles();
+        this.animate();
+      }
+      
+      resize() {
+        this.width = this.canvas.width = window.innerWidth;
+        this.height = this.canvas.height = window.innerHeight;
+      }
+      
+      initParticles() {
+        this.particles = [];
+        for (let i = 0; i < this.particleCount; i++) {
+          this.particles.push(this.createParticle());
+        }
+      }
+      
+      createParticle() {
+        return {
+          x: Math.random() * this.width,
+          y: Math.random() * this.height,
+          size: Math.random() * 2 + 0.5, // Taille réduite
+          speedX: (Math.random() - 0.5) * 0.3, // Vitesse réduite
+          speedY: (Math.random() - 0.5) * 0.3, // Vitesse réduite
+          hue: Math.random() * 60 + 180, // Teinte entre 180 et 240 (bleus)
+          saturation: 50 + Math.random() * 20, // Saturation réduite
+          lightness: 20 + Math.random() * 25 // Luminosité réduite
+        };
+      }
+      
+      animate() {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        
+        // Faire varier progressivement la teinte globale
+        this.hue += this.hueChangeRate;
+        if (this.hue > 240 || this.hue < 180) {
+          this.hueChangeRate *= -1;
+        }
+        
+        // Mettre à jour et dessiner chaque particule
+        this.particles.forEach(particle => {
+          // Déplacer la particule
+          particle.x += particle.speedX;
+          particle.y += particle.speedY;
+          
+          // Rebondir sur les bords
+          if (particle.x > this.width || particle.x < 0) {
+            particle.speedX = -particle.speedX;
+          }
+          if (particle.y > this.height || particle.y < 0) {
+            particle.speedY = -particle.speedY;
+          }
+          
+          // Faire varier légèrement la couleur de la particule
+          particle.hue = (particle.hue + Math.random() * 0.3) % 360; // Variation réduite
+          
+          // Dessiner la particule
+          this.ctx.beginPath();
+          this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          
+          // Utiliser une couleur basée sur la teinte globale et celle de la particule
+          const mixHue = (this.hue * 0.7 + particle.hue * 0.3) % 360;
+          const color = `hsl(${mixHue}, ${particle.saturation}%, ${particle.lightness}%)`;
+          
+          this.ctx.fillStyle = color;
+          this.ctx.fill();
+        });
+        
+        requestAnimationFrame(this.animate.bind(this));
+      }
+    }
+
+    // Initialisation de l'application
+    document.addEventListener('DOMContentLoaded', () => {
+      new MinesPredictor();
+      new BlueParticles();
+      createAnimatedCircles();
+    });
+
+    // Fonction pour créer des cercles animés en fond
+    function createAnimatedCircles() {
+      const backgroundAnim = document.querySelector('.background-anim');
+      const colors = [
+        'rgba(14, 165, 233, 0.3)',
+        'rgba(139, 92, 246, 0.3)',
+        'rgba(236, 72, 153, 0.3)'
+      ];
+
+      for (let i = 0; i < 5; i++) {
+        const circle = document.createElement('div');
+        circle.classList.add('circle');
+
+        // Taille aléatoire
+        const size = Math.random() * 200 + 100;
+        circle.style.width = `${size}px`;
+        circle.style.height = `${size}px`;
+
+        // Position aléatoire
+        circle.style.top = `${Math.random() * 100}%`;
+        circle.style.left = `${Math.random() * 100}%`;
+
+        // Couleur aléatoire
+        circle.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]}, transparent 70%)`;
+
+        // Animation aléatoire
+        const duration = Math.random() * 30 + 20;
+        const delay = Math.random() * -20;
+        circle.style.animation = `float ${duration}s infinite linear`;
+        circle.style.animationDelay = `${delay}s`;
+
+        backgroundAnim.appendChild(circle);
+      }
+    }
+  </script>
+</body>
+</html>
